@@ -37,6 +37,8 @@ const App = () => {
     getUser();
   }, []);
 
+  console.log(user)
+
   return (
     <BrowserRouter>
       <div>

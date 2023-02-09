@@ -2,6 +2,7 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const GithubStrategy = require("passport-github2").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
 const passport = require("passport");
+const User=require('./models/user')
 
 passport.use(
   new GoogleStrategy(
@@ -11,7 +12,26 @@ passport.use(
       callbackURL: "/auth/google/callback",
     },
     function (accessToken, refreshToken, profile, done) {
-      done(null, profile);
+    
+      done(null,profile)
+      User.findOne({ googleId: profile.id }).then((existingUser) => {
+        if (existingUser) {
+          done(null, existingUser);
+        
+        } else {
+          new User({
+            googleId: profile.id,
+            username: profile.displayName,
+          firstName:profile.name.givenName,
+            lastName:profile.name.familyName,
+            profilePhoto:profile.photos[0].value,
+          })
+            .save()
+            .then((user) => done(null, user));
+            
+
+        }
+      });
     }
   )
 );
